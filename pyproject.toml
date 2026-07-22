@@ -1,0 +1,9 @@
+[project]
+name = "log-analyzer"
+version = "0.1.0"
+description = "Production-grade CLI tool for analyzing log files using Python, Regex, JSON configuration, and pytest."
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

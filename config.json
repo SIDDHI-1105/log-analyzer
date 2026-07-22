@@ -1,0 +1,30 @@
+{
+  "patterns": [
+    {
+      "name": "Critical Error",
+      "regex": "CRITICAL|FATAL",
+      "severity": "CRITICAL"
+    },
+    {
+      "name": "Error",
+      "regex": "ERROR",
+      "severity": "ERROR"
+    },
+    {
+      "name": "Warning",
+      "regex": "WARN|WARNING",
+      "severity": "WARNING"
+    },
+    {
+      "name": "Information",
+      "regex": "INFO",
+      "severity": "INFO"
+    }
+  ],
+  "alert_thresholds": {
+    "CRITICAL": 1,
+    "ERROR": 5,
+    "WARNING": 10,
+    "INFO": 100
+  }
+}
