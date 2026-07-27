@@ -9,6 +9,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from api.v1 import auth as auth_v1
 from core.config import get_settings
 
 settings = get_settings()
@@ -29,6 +30,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# API v1 routers
+app.include_router(auth_v1.router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["Health"])
