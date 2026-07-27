@@ -1,9 +1,9 @@
 [project]
-name = "log-analyzer"
-version = "0.1.0"
-description = "Production-grade CLI tool for analyzing log files using Python, Regex, JSON configuration, and pytest."
+name = "log-analyzer-platform"
+version = "0.2.0"
+description = "Enterprise Log Analyzer with CLI, Backend API, and React Dashboard"
 requires-python = ">=3.12"
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["src"]
+testpaths = ["cli/tests", "backend/tests"]
+pythonpath = ["cli/src", "backend/src"]
