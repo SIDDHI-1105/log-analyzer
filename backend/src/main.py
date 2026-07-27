@@ -1,0 +1,53 @@
+"""
+backend/src/main.py
+
+FastAPI application entry point.
+"""
+
+from __future__ import annotations
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from core.config import get_settings
+
+settings = get_settings()
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION,
+    debug=settings.DEBUG,
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/health", tags=["Health"])
+def health_check() -> dict[str, str]:
+    """
+    Public health check endpoint.
+    """
+    return {
+        "status": "ok",
+        "version": settings.APP_VERSION,
+    }
+
+
+@app.get("/api/v1/health", tags=["Health"])
+def api_health_check() -> dict[str, str]:
+    """
+    Versioned health check endpoint.
+    """
+    return {
+        "status": "ok",
+        "version": settings.APP_VERSION,
+    }
