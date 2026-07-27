@@ -8,7 +8,8 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from jose import jwt
+from fastapi import HTTPException, status
+from jose import jwt, JWTError
 from passlib.context import CryptContext
 
 from core.config import get_settings
@@ -49,3 +50,36 @@ def create_access_token(subject: str, expires_delta: timedelta | None = None) ->
         to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
     )
     return encoded_jwt
+
+
+def decode_access_token(token: str) -> str:
+    """
+    Decode and validate a JWT access token.
+
+    Args:
+        token: The JWT token string.
+
+    Returns:
+        The subject (user id) from the token.
+
+    Raises:
+        HTTPException: If the token is invalid or expired.
+    """
+    try:
+        payload = jwt.decode(
+            token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
+        )
+        subject: str | None = payload.get("sub")
+        if subject is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return subject
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
