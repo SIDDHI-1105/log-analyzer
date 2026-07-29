@@ -1,21 +1,38 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ProtectedRoute } from "@/components/layout/protected-route";
+import { AppShell } from "@/components/layout/app-shell";
+import { LoginPage } from "@/pages/login-page";
+import { RegisterPage } from "@/pages/register-page";
+import { DashboardPage } from "@/pages/dashboard-page";
+import { LogsPage } from "@/pages/logs-page";
+import { AlertsPage } from "@/pages/alerts-page";
+import { SettingsPage } from "@/pages/settings-page";
+
 function App() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight">
-          Log Analyzer Platform
-        </h1>
-        <p className="mt-4 text-lg text-muted-foreground">
-          Enterprise Observability Dashboard
-        </p>
-        <div className="mt-8">
-          <span className="inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-            Frontend scaffold complete
-          </span>
-        </div>
-      </div>
-    </div>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/*"
+          element={
+            <ProtectedRoute>
+              <AppShell>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/logs" element={<LogsPage />} />
+                  <Route path="/alerts" element={<AlertsPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                </Routes>
+              </AppShell>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
