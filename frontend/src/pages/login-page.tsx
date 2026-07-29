@@ -20,6 +20,7 @@ export function LoginPage() {
     mutationFn: login,
     onSuccess: async (data) => {
       setError(null);
+      localStorage.setItem("access_token", data.access_token);
       try {
         const user = await getCurrentUser();
         setAuth(user, data.access_token);
