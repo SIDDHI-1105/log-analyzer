@@ -11,6 +11,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.v1 import auth as auth_v1
 from api.v1 import logs as logs_v1
+from api.v1 import alerts as alerts_v1
+from api.v1 import dashboards as dashboards_v1
+from api.v1 import export as export_v1
+from api.v1 import api_keys as api_keys_v1
+from api.v1 import live_tail as live_tail_v1
 from core.config import get_settings
 
 settings = get_settings()
@@ -35,6 +40,11 @@ app.add_middleware(
 # API v1 routers
 app.include_router(auth_v1.router, prefix="/api/v1")
 app.include_router(logs_v1.router, prefix="/api/v1")
+app.include_router(alerts_v1.router, prefix="/api/v1")
+app.include_router(dashboards_v1.router, prefix="/api/v1")
+app.include_router(export_v1.router, prefix="/api/v1")
+app.include_router(api_keys_v1.router, prefix="/api/v1")
+app.include_router(live_tail_v1.router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["Health"])

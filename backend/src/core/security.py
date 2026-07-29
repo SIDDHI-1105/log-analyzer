@@ -1,11 +1,12 @@
 """
 backend/src/core/security.py
 
-Security utilities: password hashing and JWT token management.
+Security utilities: password hashing, JWT token management, and API key hashing.
 """
 
 from __future__ import annotations
 
+import secrets
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
@@ -83,3 +84,33 @@ def decode_access_token(token: str) -> str:
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+# ─────────────────────────────────────────────
+# API Key Utilities
+# ─────────────────────────────────────────────
+
+def generate_api_key() -> str:
+    """
+    Generate a cryptographically secure random API key.
+
+    Format: la_<64 hex chars> (66 chars total)
+    The 'la_' prefix makes it easy to identify in logs.
+    """
+    return "la_" + secrets.token_hex(32)
+
+
+def hash_api_key(api_key: str) -> str:
+    """
+    Hash an API key for secure storage.
+
+    Uses the same Argon2 context as passwords.
+    """
+    return pwd_context.hash(api_key)
+
+
+def verify_api_key(plain_api_key: str, hashed_api_key: str) -> bool:
+    """
+    Verify a plain API key against its stored hash.
+    """
+    return pwd_context.verify(plain_api_key, hashed_api_key)
