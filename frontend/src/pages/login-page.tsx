@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { LogIn, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
+import { LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,31 +15,29 @@ export function LoginPage() {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [formData, setFormData] = useState<UserLogin>({ email: "", password: "" });
-  const [error, setError] = useState<string | null>(null);
 
   const loginMutation = useMutation({
     mutationFn: login,
     onSuccess: async (data) => {
-      setError(null);
       localStorage.setItem("access_token", data.access_token);
       try {
         const user = await getCurrentUser();
         setAuth(user, data.access_token);
+        toast.success("Welcome back!", { description: `Signed in as ${user.email}` });
         navigate("/dashboard");
       } catch {
-        setError("Failed to fetch user profile.");
+        toast.error("Failed to fetch user profile.");
       }
     },
     onError: (err: Error) => {
-      setError(err.message || "Login failed. Please check your credentials.");
+      toast.error(err.message || "Login failed. Please check your credentials.");
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     if (!formData.email || !formData.password) {
-      setError("Please fill in all fields.");
+      toast.error("Please fill in all fields.");
       return;
     }
     loginMutation.mutate(formData);
@@ -56,12 +55,6 @@ export function LoginPage() {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            {error && (
-              <div className="flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
-                <AlertCircle className="size-4 shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input

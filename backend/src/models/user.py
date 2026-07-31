@@ -12,7 +12,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import String, DateTime, func
+from sqlalchemy import String, DateTime, func, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.database import Base
@@ -57,6 +57,10 @@ class User(Base):
     )
     is_active: Mapped[bool] = mapped_column(
         default=True,
+    )
+    avatar_url: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -13,7 +13,7 @@ from api.deps import get_current_user
 from core.database import get_db
 from core.security import create_access_token, get_password_hash, verify_password
 from models.user import User
-from schemas.user import Token, UserCreate, UserLogin, UserResponse
+from schemas.user import Token, UserCreate, UserLogin, UserResponse, UserUpdate
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -68,4 +68,21 @@ def get_me(current_user: User = Depends(get_current_user)) -> User:
     """
     Get the currently authenticated user's profile.
     """
+    return current_user
+
+
+@router.put("/me", response_model=UserResponse)
+def update_me(
+    user_in: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """
+    Update the currently authenticated user's profile.
+    """
+    if user_in.avatar_url is not None:
+        current_user.avatar_url = user_in.avatar_url
+
+    db.commit()
+    db.refresh(current_user)
     return current_user

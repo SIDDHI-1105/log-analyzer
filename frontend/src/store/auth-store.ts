@@ -1,31 +1,51 @@
 import { create } from "zustand";
 import type { User } from "@/types/auth";
+import { getCurrentUser } from "@/services/auth";
 
 interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   setAuth: (user: User, token: string) => void;
   clearAuth: () => void;
-  initialize: () => void;
+  initialize: () => Promise<void>;
+  updateUser: (user: User) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
   isAuthenticated: false,
+  isLoading: true,
+
   setAuth: (user, token) => {
     localStorage.setItem("access_token", token);
-    set({ user, token, isAuthenticated: true });
+    set({ user, token, isAuthenticated: true, isLoading: false });
   },
+
   clearAuth: () => {
     localStorage.removeItem("access_token");
-    set({ user: null, token: null, isAuthenticated: false });
+    set({ user: null, token: null, isAuthenticated: false, isLoading: false });
   },
-  initialize: () => {
+
+  initialize: async () => {
     const token = localStorage.getItem("access_token");
-    if (token) {
-      set({ token, isAuthenticated: true });
+    if (!token) {
+      set({ isLoading: false });
+      return;
     }
+
+    try {
+      const user = await getCurrentUser();
+      set({ user, token, isAuthenticated: true, isLoading: false });
+    } catch {
+      localStorage.removeItem("access_token");
+      set({ user: null, token: null, isAuthenticated: false, isLoading: false });
+    }
+  },
+
+  updateUser: (user) => {
+    set({ user });
   },
 }));

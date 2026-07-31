@@ -3,6 +3,7 @@ export interface User {
   email: string;
   role: "admin" | "editor" | "viewer";
   is_active: boolean;
+  avatar_url: string | null;
 }
 
 export interface UserCreate {
@@ -13,6 +14,10 @@ export interface UserCreate {
 export interface UserLogin {
   email: string;
   password: string;
+}
+
+export interface UserUpdate {
+  avatar_url: string | null;
 }
 
 export interface TokenResponse {

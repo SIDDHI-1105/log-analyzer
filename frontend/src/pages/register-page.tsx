@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { UserPlus, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
+import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,42 +19,40 @@ export function RegisterPage() {
     password: "",
     confirmPassword: "",
   });
-  const [error, setError] = useState<string | null>(null);
 
   const registerMutation = useMutation({
     mutationFn: register,
     onSuccess: async (data) => {
-      setError(null);
       localStorage.setItem("access_token", data.access_token);
       try {
         const user = await getCurrentUser();
         setAuth(user, data.access_token);
+        toast.success("Account created!", { description: `Welcome, ${user.email}` });
         navigate("/dashboard");
       } catch {
-        setError("Failed to fetch user profile.");
+        toast.error("Failed to fetch user profile.");
       }
     },
     onError: (err: Error) => {
-      setError(err.message || "Registration failed. Please try again.");
+      toast.error(err.message || "Registration failed. Please try again.");
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
     if (!formData.email || !formData.password) {
-      setError("Please fill in all fields.");
+      toast.error("Please fill in all fields.");
       return;
     }
 
     if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      toast.error("Password must be at least 8 characters.");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
 
@@ -73,12 +72,6 @@ export function RegisterPage() {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            {error && (
-              <div className="flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
-                <AlertCircle className="size-4 shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input

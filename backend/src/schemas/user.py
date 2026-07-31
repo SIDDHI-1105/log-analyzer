@@ -24,11 +24,17 @@ class UserLogin(UserBase):
     password: str
 
 
+class UserUpdate(BaseModel):
+    """Schema for updating user profile."""
+    avatar_url: str | None = None
+
+
 class UserResponse(UserBase):
     """Schema for user profile (response)."""
     id: str
     role: str
     is_active: bool
+    avatar_url: str | None = None
 
     class Config:
         from_attributes = True

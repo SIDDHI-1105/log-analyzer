@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Bell, Plus, Trash2, Power, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,6 +62,7 @@ export function AlertsPage() {
   const createMutation = useMutation({
     mutationFn: createAlertRule,
     onSuccess: () => {
+      toast.success("Alert rule created successfully");
       queryClient.invalidateQueries({ queryKey: ["alert-rules"] });
       setDialogOpen(false);
       setNewRule({
@@ -73,17 +75,32 @@ export function AlertsPage() {
         is_active: true,
       });
     },
+    onError: () => {
+      toast.error("Failed to create alert rule");
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteAlertRule,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alert-rules"] }),
+    onSuccess: () => {
+      toast.success("Alert rule deleted");
+      queryClient.invalidateQueries({ queryKey: ["alert-rules"] });
+    },
+    onError: () => {
+      toast.error("Failed to delete alert rule");
+    },
   });
 
   const toggleMutation = useMutation({
     mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
       updateAlertRule(id, { is_active }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alert-rules"] }),
+    onSuccess: (_, variables) => {
+      toast.success(variables.is_active ? "Alert rule enabled" : "Alert rule disabled");
+      queryClient.invalidateQueries({ queryKey: ["alert-rules"] });
+    },
+    onError: () => {
+      toast.error("Failed to update alert rule");
+    },
   });
 
   const handleCreate = (e: React.FormEvent) => {
@@ -99,11 +116,9 @@ export function AlertsPage() {
           <p className="mt-2 text-muted-foreground">Manage alert rules and view history</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger>
-            <Button>
-              <Plus className="mr-2 size-4" />
-              New Rule
-            </Button>
+          <DialogTrigger render={<Button />}>
+            <Plus className="mr-2 size-4" />
+            New Rule
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
@@ -234,7 +249,11 @@ export function AlertsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => deleteMutation.mutate(rule.id)}
+                            onClick={() => {
+                              if (confirm("Are you sure you want to delete this alert rule?")) {
+                                deleteMutation.mutate(rule.id);
+                              }
+                            }}
                             title="Delete"
                           >
                             <Trash2 className="size-4 text-destructive" />
