@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "log-analyzer-backend"
+version = "0.2.0"
+description = "Log Analyzer Backend API"
+requires-python = ">=3.12"
+
+[tool.setuptools.packages.find]
+where = ["src"]
