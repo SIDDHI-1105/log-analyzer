@@ -26,7 +26,14 @@ class UserLogin(UserBase):
 
 class UserUpdate(BaseModel):
     """Schema for updating user profile."""
+    email: EmailStr | None = None
     avatar_url: str | None = None
+
+
+class PasswordChange(BaseModel):
+    """Schema for changing password."""
+    current_password: str = Field(..., min_length=8, max_length=128)
+    new_password: str = Field(..., min_length=8, max_length=128)
 
 
 class UserResponse(UserBase):

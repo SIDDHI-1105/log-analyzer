@@ -4,20 +4,22 @@ import { toast } from "sonner";
 import {
   User,
   Key,
-  Palette,
   Copy,
   Check,
   Trash2,
-  Plus,
   Sun,
   Moon,
   Monitor,
   Camera,
+  Lock,
+  FileText,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
@@ -33,13 +35,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useAuthStore } from "@/store/auth-store";
 import { useTheme } from "@/hooks/use-theme";
-import { getCurrentUser, updateCurrentUser } from "@/services/auth";
+import { getCurrentUser, updateCurrentUser, changePassword } from "@/services/auth";
 import { getApiKeys, createApiKey, revokeApiKey } from "@/services/api-keys";
-import type { ApiKeyCreate } from "@/types/api-key";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
@@ -53,13 +53,28 @@ function fileToBase64(file: File): Promise<string> {
 }
 
 export function SettingsPage() {
+  const queryClient = useQueryClient();
   const { user, token, updateUser } = useAuthStore();
   const { theme, setTheme } = useTheme();
-  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { isLoading: profileLoading } = useQuery({
-    queryKey: ["current-user"],
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [createKeyOpen, setCreateKeyOpen] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  // Password form
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: "",
+    new_password: "",
+    confirm_password: "",
+  });
+
+  // API key form
+  const [keyName, setKeyName] = useState("");
+
+  const { data: currentUser, isLoading: userLoading } = useQuery({
+    queryKey: ["auth-me"],
     queryFn: getCurrentUser,
     enabled: !!token && !user,
     staleTime: 5 * 60 * 1000,
@@ -70,35 +85,6 @@ export function SettingsPage() {
     queryKey: ["api-keys"],
     queryFn: getApiKeys,
     enabled: !!token,
-  });
-
-  const [newKeyName, setNewKeyName] = useState("");
-  const [newKeyDialogOpen, setNewKeyDialogOpen] = useState(false);
-  const [createdKey, setCreatedKey] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [uploading, setUploading] = useState(false);
-
-  const createMutation = useMutation({
-    mutationFn: (data: ApiKeyCreate) => createApiKey(data),
-    onSuccess: (data) => {
-      setCreatedKey(data.key);
-      toast.success("API key created successfully");
-      queryClient.invalidateQueries({ queryKey: ["api-keys"] });
-    },
-    onError: () => {
-      toast.error("Failed to create API key");
-    },
-  });
-
-  const revokeMutation = useMutation({
-    mutationFn: (id: string) => revokeApiKey(id),
-    onSuccess: () => {
-      toast.success("API key revoked");
-      queryClient.invalidateQueries({ queryKey: ["api-keys"] });
-    },
-    onError: () => {
-      toast.error("Failed to revoke API key");
-    },
   });
 
   const avatarMutation = useMutation({
@@ -115,26 +101,44 @@ export function SettingsPage() {
     },
   });
 
-  const handleCreateKey = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newKeyName.trim()) return;
-    createMutation.mutate({ name: newKeyName.trim() });
-    setNewKeyName("");
-  };
+  const changePasswordMutation = useMutation({
+    mutationFn: changePassword,
+    onSuccess: () => {
+      toast.success("Password changed successfully");
+      setChangePasswordOpen(false);
+      setPasswordForm({ current_password: "", new_password: "", confirm_password: "" });
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.detail || "Failed to change password");
+    },
+  });
 
-  const handleCopyKey = async () => {
-    if (!createdKey) return;
-    await navigator.clipboard.writeText(createdKey);
-    setCopied(true);
-    toast.success("API key copied to clipboard");
-    setTimeout(() => setCopied(false), 2000);
-  };
+  const createKeyMutation = useMutation({
+    mutationFn: createApiKey,
+    onSuccess: (data) => {
+      toast.success("API key created successfully");
+      queryClient.invalidateQueries({ queryKey: ["api-keys"] });
+      setCreateKeyOpen(false);
+      setKeyName("");
+      navigator.clipboard.writeText(data.key);
+      setCopiedKey(data.key);
+      setTimeout(() => setCopiedKey(null), 3000);
+    },
+    onError: () => {
+      toast.error("Failed to create API key");
+    },
+  });
 
-  const handleCloseKeyDialog = () => {
-    setNewKeyDialogOpen(false);
-    setCreatedKey(null);
-    setCopied(false);
-  };
+  const revokeKeyMutation = useMutation({
+    mutationFn: revokeApiKey,
+    onSuccess: () => {
+      toast.success("API key revoked");
+      queryClient.invalidateQueries({ queryKey: ["api-keys"] });
+    },
+    onError: () => {
+      toast.error("Failed to revoke API key");
+    },
+  });
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -157,7 +161,6 @@ export function SettingsPage() {
     setUploading(true);
     try {
       const base64 = await fileToBase64(file);
-      console.log("Base64 length:", base64.length);
       avatarMutation.mutate({ avatar_url: base64 });
     } catch (err) {
       console.error("File processing error:", err);
@@ -165,12 +168,35 @@ export function SettingsPage() {
       setUploading(false);
     }
 
-    // Reset input
     e.target.value = "";
   };
 
-  const initials = user?.email
-    ? user.email
+  const handleCopyKey = (key: string) => {
+    navigator.clipboard.writeText(key);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+
+  const handleChangePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordForm.new_password !== passwordForm.confirm_password) {
+      toast.error("New passwords do not match");
+      return;
+    }
+    if (passwordForm.new_password.length < 8) {
+      toast.error("New password must be at least 8 characters");
+      return;
+    }
+    changePasswordMutation.mutate({
+      current_password: passwordForm.current_password,
+      new_password: passwordForm.new_password,
+    });
+  };
+
+  const displayUser = currentUser || user;
+
+  const initials = displayUser?.email
+    ? displayUser.email
         .split("@")[0]
         .split(/[._-]/)
         .map((n) => n[0])
@@ -184,29 +210,34 @@ export function SettingsPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
         <p className="mt-2 text-muted-foreground">
-          Manage your account, API keys, and preferences.
+          Manage your account, API keys, and preferences
         </p>
       </div>
 
+      {/* Profile Card */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="size-5" />
             Profile
           </CardTitle>
-          <CardDescription>Your account information.</CardDescription>
+          <CardDescription>Your account information</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {profileLoading && !user ? (
-            <p className="text-sm text-muted-foreground">Loading profile...</p>
-          ) : user ? (
-            <div className="space-y-6">
+          {userLoading && !displayUser ? (
+            <div className="space-y-3">
+              <Skeleton className="h-20 w-20 rounded-full" />
+              <Skeleton className="h-4 w-[200px]" />
+              <Skeleton className="h-4 w-[150px]" />
+            </div>
+          ) : displayUser ? (
+            <>
               {/* Avatar Section */}
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <Avatar className="size-20">
-                    {user.avatar_url ? (
-                      <AvatarImage src={user.avatar_url} alt={user.email} />
+                    {displayUser.avatar_url ? (
+                      <AvatarImage src={displayUser.avatar_url} alt={displayUser.email} />
                     ) : null}
                     <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-medium">
                       {initials}
@@ -230,7 +261,7 @@ export function SettingsPage() {
                 </div>
                 <div>
                   <p className="text-sm font-medium">
-                    {user.email.split("@")[0]}
+                    {displayUser.email.split("@")[0]}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Click the camera icon to upload a new picture
@@ -243,206 +274,259 @@ export function SettingsPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Email</Label>
-                  <p className="text-sm font-medium">{user.email}</p>
+                  <p className="text-sm font-medium">{displayUser.email}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Role</Label>
                   <div className="mt-1">
-                    <Badge variant="secondary">{user.role}</Badge>
+                    <Badge variant="secondary">{displayUser.role}</Badge>
                   </div>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Status</Label>
                   <div className="mt-1">
-                    <Badge variant={user.is_active ? "default" : "destructive"}>
-                      {user.is_active ? "Active" : "Inactive"}
+                    <Badge variant={displayUser.is_active ? "default" : "destructive"}>
+                      {displayUser.is_active ? "Active" : "Inactive"}
                     </Badge>
                   </div>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">User ID</Label>
-                  <p className="font-mono text-xs text-muted-foreground">{user.id}</p>
+                  <p className="text-sm font-mono">{displayUser.id}</p>
                 </div>
               </div>
-            </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button variant="outline" size="sm" onClick={() => setChangePasswordOpen(true)}>
+                  <Lock className="mr-2 size-4" />
+                  Change Password
+                </Button>
+              </div>
+            </>
           ) : (
-            <p className="text-sm text-muted-foreground">Unable to load profile.</p>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <AlertCircle className="size-4" />
+              Failed to load profile
+            </div>
           )}
         </CardContent>
       </Card>
 
+      {/* API Keys Card */}
       <Card>
-        <CardHeader className="flex flex-row items-start justify-between">
+        <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
               <Key className="size-5" />
               API Keys
             </CardTitle>
-            <CardDescription>
-              Manage API keys for external log ingestion.
-            </CardDescription>
+            <CardDescription>Manage your API keys for programmatic access</CardDescription>
           </div>
-          <Dialog open={newKeyDialogOpen} onOpenChange={setNewKeyDialogOpen}>
-            <DialogTrigger render={<Button size="sm" />}>
-              <Plus className="mr-2 size-4" />
-              New Key
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Create API Key</DialogTitle>
-                <DialogDescription>
-                  Generate a new API key for external systems to push logs.
-                </DialogDescription>
-              </DialogHeader>
-
-              {createdKey ? (
-                <div className="space-y-4">
-                  <div className="rounded-md border border-yellow-500/20 bg-yellow-500/10 p-4">
-                    <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
-                      Copy this key now. You won&apos;t be able to see it again.
-                    </p>
+          <Button size="sm" onClick={() => setCreateKeyOpen(true)}>
+            <Key className="mr-2 size-4" />
+            Create Key
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {keysLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ) : !apiKeys || apiKeys.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <FileText className="h-10 w-10 text-muted-foreground mb-3" />
+              <h3 className="text-sm font-medium">No API keys</h3>
+              <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+                Create an API key to authenticate log ingestion and other API requests programmatically.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {apiKeys.map((key) => (
+                <div
+                  key={key.id}
+                  className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium truncate">{key.name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono">
+                        {key.key_prefix}...
+                      </code>
+                      <Badge variant={key.is_active ? "default" : "secondary"} className="text-xs">
+                        {key.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      value={createdKey}
-                      readOnly
-                      className="font-mono text-sm"
-                    />
+                  <div className="flex items-center gap-1 ml-2">
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="icon"
-                      onClick={handleCopyKey}
+                      className="size-8"
+                      onClick={() => handleCopyKey(key.key)}
                     >
-                      {copied ? (
+                      {copiedKey === key.key ? (
                         <Check className="size-4 text-green-500" />
                       ) : (
                         <Copy className="size-4" />
                       )}
                     </Button>
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={handleCloseKeyDialog}>Done</Button>
-                  </DialogFooter>
-                </div>
-              ) : (
-                <form onSubmit={handleCreateKey} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="keyName">Key Name</Label>
-                    <Input
-                      id="keyName"
-                      placeholder="e.g., Production Agent"
-                      value={newKeyName}
-                      onChange={(e) => setNewKeyName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      type="submit"
-                      disabled={createMutation.isPending}
-                    >
-                      {createMutation.isPending ? "Creating..." : "Create Key"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              )}
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-        <CardContent>
-          {keysLoading ? (
-            <p className="text-sm text-muted-foreground">Loading keys...</p>
-          ) : apiKeys && apiKeys.length > 0 ? (
-            <div className="space-y-2">
-              {apiKeys.map((key) => (
-                <div
-                  key={key.id}
-                  className="flex items-center justify-between rounded-lg border p-3"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium">{key.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {key.last_used
-                        ? `Last used: ${new Date(key.last_used).toLocaleString()}`
-                        : "Never used"}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {key.expires_at && (
-                      <Badge variant="outline">
-                        Expires {new Date(key.expires_at).toLocaleDateString()}
-                      </Badge>
-                    )}
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="size-8 text-destructive"
                       onClick={() => {
                         if (confirm("Are you sure you want to revoke this API key?")) {
-                          revokeMutation.mutate(key.id);
+                          revokeKeyMutation.mutate(key.id);
                         }
                       }}
-                      disabled={revokeMutation.isPending}
-                      title="Revoke"
                     >
-                      <Trash2 className="size-4 text-destructive" />
+                      <Trash2 className="size-4" />
                     </Button>
                   </div>
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              No API keys. Create one to enable external log ingestion.
-            </p>
           )}
         </CardContent>
       </Card>
 
+      {/* Theme Card */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Palette className="size-5" />
+            <Monitor className="size-5" />
             Appearance
           </CardTitle>
-          <CardDescription>Customize the look and feel.</CardDescription>
+          <CardDescription>Choose your preferred theme</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-4 sm:flex-row">
-            {([
-              { value: "light", label: "Light", icon: Sun },
-              { value: "dark", label: "Dark", icon: Moon },
-              { value: "system", label: "System", icon: Monitor },
-            ] as const).map((option) => {
-              const Icon = option.icon;
-              const isActive = theme === option.value;
-              return (
-                <button
-                  key={option.value}
-                  onClick={() => setTheme(option.value)}
-                  className={`flex flex-1 items-center gap-3 rounded-lg border p-4 text-left transition-colors ${
-                    isActive
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:bg-accent"
-                  }`}
-                >
-                  <Icon className="size-5" />
-                  <div>
-                    <p className="text-sm font-medium">{option.label}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {option.value === "system"
-                        ? "Follows your OS preference"
-                        : `Always ${option.value} mode`}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
+          <div className="flex gap-2">
+            <Button
+              variant={theme === "light" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setTheme("light")}
+            >
+              <Sun className="mr-2 size-4" />
+              Light
+            </Button>
+            <Button
+              variant={theme === "dark" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setTheme("dark")}
+            >
+              <Moon className="mr-2 size-4" />
+              Dark
+            </Button>
+            <Button
+              variant={theme === "system" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setTheme("system")}
+            >
+              <Monitor className="mr-2 size-4" />
+              System
+            </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Change Password Dialog */}
+      <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+            <DialogDescription>Enter your current and new password</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="current_password">Current Password</Label>
+              <Input
+                id="current_password"
+                type="password"
+                value={passwordForm.current_password}
+                onChange={(e) =>
+                  setPasswordForm((prev) => ({ ...prev, current_password: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new_password">New Password</Label>
+              <Input
+                id="new_password"
+                type="password"
+                value={passwordForm.new_password}
+                onChange={(e) =>
+                  setPasswordForm((prev) => ({ ...prev, new_password: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm_password">Confirm New Password</Label>
+              <Input
+                id="confirm_password"
+                type="password"
+                value={passwordForm.confirm_password}
+                onChange={(e) =>
+                  setPasswordForm((prev) => ({ ...prev, confirm_password: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setChangePasswordOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={changePasswordMutation.isPending}>
+                {changePasswordMutation.isPending ? "Changing..." : "Change Password"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create API Key Dialog */}
+      <Dialog open={createKeyOpen} onOpenChange={setCreateKeyOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create API Key</DialogTitle>
+            <DialogDescription>
+              Give your key a name to identify it later
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              createKeyMutation.mutate({ name: keyName });
+            }}
+            className="space-y-4"
+          >
+            <div className="space-y-2">
+              <Label htmlFor="keyName">Key Name</Label>
+              <Input
+                id="keyName"
+                value={keyName}
+                onChange={(e) => setKeyName(e.target.value)}
+                placeholder="e.g., Production Ingestion"
+                required
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setCreateKeyOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={createKeyMutation.isPending || !keyName.trim()}>
+                {createKeyMutation.isPending ? "Creating..." : "Create Key"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

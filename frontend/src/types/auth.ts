@@ -17,7 +17,13 @@ export interface UserLogin {
 }
 
 export interface UserUpdate {
-  avatar_url: string | null;
+  email?: string;
+  avatar_url?: string | null;
+}
+
+export interface PasswordChange {
+  current_password: string;
+  new_password: string;
 }
 
 export interface TokenResponse {
