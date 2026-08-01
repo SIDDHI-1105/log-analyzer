@@ -8,7 +8,7 @@ import { getAlertRules } from "@/services/alerts";
 export function DashboardPage() {
   const { data: logs, isLoading: logsLoading } = useQuery({
     queryKey: ["logs", "recent"],
-    queryFn: () => getLogs(0, 10),
+    queryFn: () => getLogs({ skip: 0, limit: 10 }),
   });
 
   const { data: alertRules, isLoading: alertsLoading } = useQuery({
@@ -16,14 +16,19 @@ export function DashboardPage() {
     queryFn: getAlertRules,
   });
 
-  const errorLogs = logs?.filter((log) => log.level === "ERROR" || log.level === "CRITICAL") ?? [];
+  const logItems = logs?.items ?? [];
+  const errorLogs = logItems.filter(
+    (log) => log.level === "ERROR" || log.level === "CRITICAL",
+  );
   const activeAlerts = alertRules?.filter((rule) => rule.is_active) ?? [];
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="mt-2 text-muted-foreground">Overview of your observability platform</p>
+        <p className="mt-2 text-muted-foreground">
+          Overview of your observability platform
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -33,8 +38,10 @@ export function DashboardPage() {
             <ScrollText className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{logsLoading ? "..." : logs?.length ?? 0}</div>
-            <p className="text-xs text-muted-foreground">Last 10 fetched</p>
+            <div className="text-2xl font-bold">
+              {logsLoading ? "..." : (logs?.total ?? 0)}
+            </div>
+            <p className="text-xs text-muted-foreground">Total in database</p>
           </CardContent>
         </Card>
 
@@ -44,7 +51,9 @@ export function DashboardPage() {
             <Bell className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{alertsLoading ? "..." : activeAlerts.length}</div>
+            <div className="text-2xl font-bold">
+              {alertsLoading ? "..." : activeAlerts.length}
+            </div>
             <p className="text-xs text-muted-foreground">Alert rules enabled</p>
           </CardContent>
         </Card>
@@ -56,9 +65,16 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {logsLoading ? "..." : logs?.length ? Math.round((errorLogs.length / logs.length) * 100) : 0}%
+              {logsLoading
+                ? "..."
+                : logItems.length
+                  ? Math.round((errorLogs.length / logItems.length) * 100)
+                  : 0}
+              %
             </div>
-            <p className="text-xs text-muted-foreground">Errors in recent logs</p>
+            <p className="text-xs text-muted-foreground">
+              Errors in recent logs
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -74,15 +90,28 @@ export function DashboardPage() {
           <CardContent>
             {logsLoading ? (
               <p className="text-sm text-muted-foreground">Loading logs...</p>
-            ) : logs && logs.length > 0 ? (
+            ) : logItems.length > 0 ? (
               <div className="space-y-2">
-                {logs.slice(0, 5).map((log) => (
-                  <div key={log.id} className="flex items-center justify-between rounded-lg border p-3">
+                {logItems.slice(0, 5).map((log) => (
+                  <div
+                    key={log.id}
+                    className="flex items-center justify-between rounded-lg border p-3"
+                  >
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{log.message}</p>
-                      <p className="text-xs text-muted-foreground">{log.service || "unknown"}</p>
+                      <p className="truncate text-sm font-medium">
+                        {log.message}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {log.service || "unknown"}
+                      </p>
                     </div>
-                    <Badge variant={log.level === "ERROR" || log.level === "CRITICAL" ? "destructive" : "secondary"}>
+                    <Badge
+                      variant={
+                        log.level === "ERROR" || log.level === "CRITICAL"
+                          ? "destructive"
+                          : "secondary"
+                      }
+                    >
                       {log.level}
                     </Badge>
                   </div>
@@ -107,11 +136,17 @@ export function DashboardPage() {
             ) : activeAlerts.length > 0 ? (
               <div className="space-y-2">
                 {activeAlerts.slice(0, 5).map((rule) => (
-                  <div key={rule.id} className="flex items-center justify-between rounded-lg border p-3">
+                  <div
+                    key={rule.id}
+                    className="flex items-center justify-between rounded-lg border p-3"
+                  >
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{rule.name}</p>
+                      <p className="truncate text-sm font-medium">
+                        {rule.name}
+                      </p>
                       <p className="text-xs text-muted-foreground">
-                        Threshold: {rule.threshold} in {rule.time_window_seconds}s
+                        Threshold: {rule.threshold} in{" "}
+                        {rule.time_window_seconds}s
                       </p>
                     </div>
                     <Badge variant="default">{rule.severity}</Badge>
@@ -119,7 +154,9 @@ export function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No active alert rules.</p>
+              <p className="text-sm text-muted-foreground">
+                No active alert rules.
+              </p>
             )}
           </CardContent>
         </Card>

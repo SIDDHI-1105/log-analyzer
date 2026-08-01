@@ -13,7 +13,7 @@ from api.deps import get_current_user, get_current_user_jwt_or_api_key
 from core.database import get_db
 from models.log_entry import LogEntry as LogEntryModel
 from models.user import User
-from schemas.log import LogBatchIngest, LogEntryResponse, LogIngestResponse
+from schemas.log import LogBatchIngest, LogEntryResponse, LogIngestResponse, LogListResponse
 from services.alert_evaluator import evaluate_logs_for_alerts
 from services.live_tail import live_tail_manager
 
@@ -97,20 +97,42 @@ def ingest_logs(
     return {"ingested": ingested, "failed": failed}
 
 
-@router.get("/", response_model=list[LogEntryResponse])
+@router.get("/", response_model=LogListResponse)
 def list_logs(
     skip: int = 0,
     limit: int = 50,
     level: str | None = None,
+    service: str | None = None,
+    search: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> list[LogEntryModel]:
+) -> LogListResponse:
     """
     List log entries with optional filtering.
 
     Requires authentication via JWT token.
+    Returns paginated response with total count.
     """
     query = db.query(LogEntryModel)
+    
     if level:
         query = query.filter(LogEntryModel.level == level.upper())
-    return query.order_by(LogEntryModel.created_at.desc()).offset(skip).limit(limit).all()
+    
+    if service:
+        query = query.filter(LogEntryModel.service.ilike(service))
+    
+    if search:
+        query = query.filter(LogEntryModel.message.ilike(f"%{search}%"))
+    
+    # Get total count before pagination
+    total = query.count()
+    
+    # Apply ordering and pagination
+    items = query.order_by(LogEntryModel.created_at.desc()).offset(skip).limit(limit).all()
+    
+    return LogListResponse(
+        items=items,
+        total=total,
+        skip=skip,
+        limit=limit,
+    )

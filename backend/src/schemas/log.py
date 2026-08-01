@@ -50,3 +50,18 @@ class LogIngestResponse(BaseModel):
     """Schema for log ingestion response."""
     ingested: int
     failed: int = 0
+
+
+class LogListResponse(BaseModel):
+    """Paginated response for log listing."""
+    items: list[LogEntryResponse]
+    total: int
+    skip: int
+    limit: int
+
+class LogListResponse(BaseModel):
+    """Paginated response for log listing."""
+    items: list[LogEntryResponse]
+    total: int
+    skip: int
+    limit: int
