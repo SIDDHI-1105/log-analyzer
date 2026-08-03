@@ -217,7 +217,7 @@ export default function LogsPage() {
               {/* Level Filter */}
               <Select
                 value={levelFilter}
-                onValueChange={(value) => {
+                onValueChange={(value) => { if (!value) return;
                   setLevelFilter(value);
                   setSkip(0);
                 }}
@@ -238,7 +238,7 @@ export default function LogsPage() {
               {/* Service Filter */}
               <Select
                 value={serviceFilter}
-                onValueChange={(value) => {
+                onValueChange={(value) => { if (!value) return;
                   setServiceFilter(value);
                   setSkip(0);
                 }}
@@ -259,7 +259,7 @@ export default function LogsPage() {
               {/* Page Size */}
               <Select
                 value={String(limit)}
-                onValueChange={(value) => {
+                onValueChange={(value) => { if (!value) return;
                   setLimit(Number(value));
                   setSkip(0);
                 }}

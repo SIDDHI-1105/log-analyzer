@@ -1,0 +1,50 @@
+# Render Blueprint for Log Analyzer
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  # Backend API (FastAPI + PostgreSQL)
+  - type: web
+    name: log-analyzer-backend
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    rootDir: backend
+    buildCommand: ./build.sh
+    startCommand: ./start.sh
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: log-analyzer-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: BACKEND_CORS_ORIGINS
+        value: '["https://log-analyzer-frontend.onrender.com"]'
+      - key: DEBUG
+        value: "False"
+      - key: PYTHONPATH
+        value: /opt/render/project/src/backend/src
+
+  # Frontend (React Static Site)
+  - type: static
+    name: log-analyzer-frontend
+    runtime: static
+    plan: free
+    region: oregon
+    branch: main
+    rootDir: frontend
+    buildCommand: npm ci && VITE_API_BASE_URL=https://log-analyzer-backend.onrender.com/api/v1 npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: 22.0.0
+
+databases:
+  - name: log-analyzer-db
+    plan: free
+    region: oregon
+    databaseName: loganalyzer
+    user: loganalyzer

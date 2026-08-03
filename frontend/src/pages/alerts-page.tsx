@@ -9,11 +9,11 @@ import {
   History,
   Search,
   Filter,
-  AlertCircle,
+
   FileText,
   Pencil,
   X,
-  Check,
+
   ChevronRight,
   Clock,
   Activity,
@@ -285,7 +285,7 @@ export function AlertsPage() {
                   className="pl-9 w-[280px]"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(value) => value && setStatusFilter(value)}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>

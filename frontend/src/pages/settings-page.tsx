@@ -367,9 +367,9 @@ export function SettingsPage() {
                       variant="ghost"
                       size="icon"
                       className="size-8"
-                      onClick={() => handleCopyKey(key.key)}
+                      onClick={() => handleCopyKey(key.key_prefix)}
                     >
-                      {copiedKey === key.key ? (
+                      {copiedKey === key.key_prefix ? (
                         <Check className="size-4 text-green-500" />
                       ) : (
                         <Copy className="size-4" />
