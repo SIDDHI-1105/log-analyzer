@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:prod": "vite build",
+    "render:build": "npm ci && vite build"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
