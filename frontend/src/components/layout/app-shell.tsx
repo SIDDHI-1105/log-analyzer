@@ -1,5 +1,5 @@
-import { Sidebar } from "./sidebar";
-import { TopBar } from "./top-bar";
+import { Sidebar } from "./sidebar.tsx";
+import { TopBar } from "./top-bar.tsx";
 import type { ReactNode } from "react";
 
 export function AppShell({ children }: { children: ReactNode }) {

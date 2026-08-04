@@ -3,13 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { LogIn } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
-import { login, getCurrentUser } from "../services/auth";
-import { useAuthStore } from "../store/auth-store";
-import type { UserLogin } from "../types/auth";
+import { Button } from "../components/ui/button.tsx";
+import { Input } from "../components/ui/input.tsx";
+import { Label } from "../components/ui/label.tsx";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card.tsx";
+import { login, getCurrentUser } from "../services/auth.ts";
+import { useAuthStore } from "../store/auth-store.ts";
+import type { UserLogin } from "../types/auth.ts";
 
 export function LoginPage() {
   const navigate = useNavigate();

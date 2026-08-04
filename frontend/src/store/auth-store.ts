@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { User } from "../types/auth";
-import { getCurrentUser } from "../services/auth";
+import type { User } from "../types/auth.ts";
+import { getCurrentUser } from "../services/auth.ts";
 
 interface AuthState {
   user: User | null;

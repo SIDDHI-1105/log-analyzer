@@ -1,5 +1,5 @@
-import api from "../lib/api";
-import type { AlertRule, AlertRuleCreate, AlertRuleUpdate, AlertHistory } from "../types/alert";
+import api from "../lib/api.ts";
+import type { AlertRule, AlertRuleCreate, AlertRuleUpdate, AlertHistory } from "../types/alert.ts";
 
 export async function getAlertRules(): Promise<AlertRule[]> {
   const response = await api.get<AlertRule[]>("/alerts/rules");

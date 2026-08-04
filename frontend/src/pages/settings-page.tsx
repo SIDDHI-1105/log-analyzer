@@ -15,19 +15,19 @@ import {
   FileText,
   AlertCircle,
 } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Badge } from "../components/ui/badge";
-import { Skeleton } from "../components/ui/skeleton";
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { Button } from "../components/ui/button.tsx";
+import { Input } from "../components/ui/input.tsx";
+import { Label } from "../components/ui/label.tsx";
+import { Badge } from "../components/ui/badge.tsx";
+import { Skeleton } from "../components/ui/skeleton.tsx";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar.tsx";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
+} from "../components/ui/card.tsx";
 import {
   Dialog,
   DialogContent,
@@ -35,11 +35,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../components/ui/dialog";
-import { useAuthStore } from "../store/auth-store";
-import { useTheme } from "../hooks/use-theme";
-import { getCurrentUser, updateCurrentUser, changePassword } from "../services/auth";
-import { getApiKeys, createApiKey, revokeApiKey } from "../services/api-keys";
+} from "../components/ui/dialog.tsx";
+import { useAuthStore } from "../store/auth-store.ts";
+import { useTheme } from "../hooks/use-theme.ts";
+import { getCurrentUser, updateCurrentUser, changePassword } from "../services/auth.ts";
+import { getApiKeys, createApiKey, revokeApiKey } from "../services/api-keys.ts";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 

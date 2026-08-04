@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../store/auth-store";
+import { useAuthStore } from "../../store/auth-store.ts";
 import {
   LogOut,
   User,
@@ -8,8 +8,8 @@ import {
   Palette,
   ChevronDown,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Badge } from "../ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar.tsx";
+import { Badge } from "../ui/badge.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "../ui/dropdown-menu.tsx";
 
 export function TopBar() {
   const navigate = useNavigate();
