@@ -9,13 +9,13 @@ import {
   TrendingUp,
   Clock,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getLogs } from "@/services/logs";
-import { getAlertRules } from "@/services/alerts";
-import { getStats, getTimeSeries } from "@/services/stats";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Skeleton } from "../components/ui/skeleton";
+import { getLogs } from "../services/logs";
+import { getAlertRules } from "../services/alerts";
+import { getStats, getTimeSeries } from "../services/stats";
 import {
   BarChart,
   Bar,

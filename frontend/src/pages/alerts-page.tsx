@@ -18,11 +18,11 @@ import {
   Clock,
   Activity,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Skeleton } from "../components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "../components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -38,23 +38,23 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+} from "../components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "../components/ui/select";
 import {
   getAlertRules,
   getAlertHistory,
   createAlertRule,
   deleteAlertRule,
   updateAlertRule,
-} from "@/services/alerts";
-import type { AlertRule, AlertRuleCreate, AlertRuleUpdate, Severity } from "@/types/alert";
+} from "../services/alerts";
+import type { AlertRule, AlertRuleCreate, AlertRuleUpdate, Severity } from "../types/alert";
 
 const SEVERITIES: Severity[] = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"];
 

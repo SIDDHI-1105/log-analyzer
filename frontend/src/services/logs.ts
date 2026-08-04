@@ -1,5 +1,5 @@
-import api from "@/lib/api";
-import type { LogEntry, LogBatchIngest, LogIngestResponse } from "@/types/log";
+import api from "../lib/api";
+import type { LogEntry, LogBatchIngest, LogIngestResponse } from "../types/log";
 
 export interface GetLogsParams {
   skip?: number;

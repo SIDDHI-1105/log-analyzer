@@ -1,5 +1,5 @@
-import api from "@/lib/api";
-import type { ApiKey, ApiKeyCreate, ApiKeyCreateResponse } from "@/types/api-key";
+import api from "../lib/api";
+import type { ApiKey, ApiKeyCreate, ApiKeyCreateResponse } from "../types/api-key";
 
 export async function getApiKeys(): Promise<ApiKey[]> {
   const response = await api.get<ApiKey[]>("/api-keys/");

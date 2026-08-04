@@ -1,5 +1,5 @@
-import api from "@/lib/api";
-import type { UserLogin, TokenResponse, User, UserUpdate, PasswordChange } from "@/types/auth";
+import api from "../lib/api";
+import type { UserLogin, TokenResponse, User, UserUpdate, PasswordChange } from "../types/auth";
 
 export async function login(credentials: UserLogin): Promise<TokenResponse> {
   const response = await api.post<TokenResponse>("/auth/login", credentials);
