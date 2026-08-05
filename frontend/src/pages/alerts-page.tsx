@@ -4,25 +4,44 @@ import { toast } from "sonner";
 import {
   Bell,
   Plus,
-  Trash2,
-  Power,
-  History,
   Search,
   Filter,
-
-  FileText,
-  Pencil,
   X,
-
-  ChevronRight,
-  Clock,
   Activity,
+  FileText,
+  Clock,
+  History,
+  Pencil,
+  Trash2,
+  Power,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "../components/ui/button.tsx";
-import { Badge } from "../components/ui/badge.tsx";
 import { Input } from "../components/ui/input.tsx";
 import { Label } from "../components/ui/label.tsx";
+import { Badge } from "../components/ui/badge.tsx";
 import { Skeleton } from "../components/ui/skeleton.tsx";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card.tsx";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select.tsx";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/ui/table.tsx";
 import {
   Dialog,
   DialogContent,
@@ -32,33 +51,24 @@ import {
   DialogTitle,
 } from "../components/ui/dialog.tsx";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/ui/table.tsx";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card.tsx";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select.tsx";
-import {
   getAlertRules,
-  getAlertHistory,
   createAlertRule,
-  deleteAlertRule,
   updateAlertRule,
+  deleteAlertRule,
+  getAlertHistory,
 } from "../services/alerts.ts";
-import type { AlertRule, AlertRuleCreate, AlertRuleUpdate, Severity } from "../types/alert.ts";
+import type {
+  AlertRule,
+  AlertRuleCreate,
+  AlertRuleUpdate,
+  Severity,
+} from "../types/alert.ts";
 
-const SEVERITIES: Severity[] = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"];
+const SEVERITIES: Severity[] = ["CRITICAL", "ERROR", "WARNING", "INFO"];
 
-function getSeverityColor(severity: string): "default" | "secondary" | "destructive" | "outline" {
+function getSeverityColor(
+  severity: string,
+): "default" | "secondary" | "destructive" | "outline" {
   switch (severity) {
     case "CRITICAL":
     case "ERROR":
@@ -121,18 +131,18 @@ export function AlertsPage() {
     queryFn: getAlertHistory,
   });
 
-  // Create map of rule_id -> rule for history display
   const ruleMap = useMemo(() => {
     const map = new Map<string, AlertRule>();
     rules?.forEach((rule) => map.set(rule.id, rule));
     return map;
   }, [rules]);
 
-  // Filter rules
   const filteredRules = useMemo(() => {
     if (!rules) return [];
     return rules.filter((rule) => {
-      const matchesSearch = rule.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = rule.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
       const matchesStatus =
         statusFilter === "ALL" ||
         (statusFilter === "ACTIVE" && rule.is_active) ||
@@ -141,7 +151,6 @@ export function AlertsPage() {
     });
   }, [rules, searchQuery, statusFilter]);
 
-  // History for detail view
   const ruleHistory = useMemo(() => {
     if (!detailRule || !history) return [];
     return history.filter((h) => h.rule_id === detailRule.id);
@@ -160,7 +169,13 @@ export function AlertsPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: AlertRuleUpdate }) => updateAlertRule(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: AlertRuleUpdate;
+    }) => updateAlertRule(id, data),
     onSuccess: () => {
       toast.success("Alert rule updated");
       queryClient.invalidateQueries({ queryKey: ["alert-rules"] });
@@ -184,10 +199,17 @@ export function AlertsPage() {
   });
 
   const toggleMutation = useMutation({
-    mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
-      updateAlertRule(id, { is_active }),
+    mutationFn: ({
+      id,
+      is_active,
+    }: {
+      id: string;
+      is_active: boolean;
+    }) => updateAlertRule(id, { is_active }),
     onSuccess: (_, variables) => {
-      toast.success(variables.is_active ? "Alert rule enabled" : "Alert rule disabled");
+      toast.success(
+        variables.is_active ? "Alert rule enabled" : "Alert rule disabled",
+      );
       queryClient.invalidateQueries({ queryKey: ["alert-rules"] });
     },
     onError: () => {
@@ -226,13 +248,16 @@ export function AlertsPage() {
     if (editingRule) {
       const updateData: AlertRuleUpdate = {};
       if (formData.name !== editingRule.name) updateData.name = formData.name;
-      if (formData.severity !== editingRule.severity) updateData.severity = formData.severity;
-      if (formData.threshold !== editingRule.threshold) updateData.threshold = formData.threshold;
+      if (formData.severity !== editingRule.severity)
+        updateData.severity = formData.severity;
+      if (formData.threshold !== editingRule.threshold)
+        updateData.threshold = formData.threshold;
       if (formData.time_window_seconds !== editingRule.time_window_seconds)
         updateData.time_window_seconds = formData.time_window_seconds;
       if (formData.match_pattern !== (editingRule.match_pattern || ""))
         updateData.match_pattern = formData.match_pattern || null;
-      if (formData.is_active !== editingRule.is_active) updateData.is_active = formData.is_active;
+      if (formData.is_active !== editingRule.is_active)
+        updateData.is_active = formData.is_active;
       updateMutation.mutate({ id: editingRule.id, data: updateData });
     } else {
       createMutation.mutate(formData);
@@ -244,17 +269,17 @@ export function AlertsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Bell className="h-8 w-8 text-primary" />
-            Alert Manager
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 sm:text-3xl">
+            <Bell className="h-6 w-6 text-primary shrink-0 sm:h-8 sm:w-8" />
+            <span className="truncate">Alert Manager</span>
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Create, manage, and monitor alert rules
           </p>
         </div>
-        <Button onClick={openCreateDialog}>
+        <Button onClick={openCreateDialog} className="shrink-0 self-start">
           <Plus className="mr-2 size-4" />
           New Rule
         </Button>
@@ -270,23 +295,28 @@ export function AlertsPage() {
         </CardHeader>
         <CardContent>
           {rulesLoading ? (
-            <div className="flex gap-4">
-              <Skeleton className="h-9 w-[280px]" />
-              <Skeleton className="h-9 w-[140px]" />
+            <div className="flex flex-wrap gap-3">
+              <Skeleton className="h-9 w-full sm:w-[200px]" />
+              <Skeleton className="h-9 w-full sm:w-[140px]" />
             </div>
           ) : (
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3">
+              <div className="relative w-full sm:w-auto">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search rules..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 w-[280px]"
+                  className="pl-9 w-full sm:w-[280px]"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={(value) => value && setStatusFilter(value)}>
-                <SelectTrigger className="w-[140px]">
+              <Select
+                value={statusFilter}
+                onValueChange={(value) =>
+                  value && setStatusFilter(value)
+                }
+              >
+                <SelectTrigger className="w-full sm:w-[140px]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -317,11 +347,11 @@ export function AlertsPage() {
       {/* Alert Rules Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="size-5" />
-            Alert Rules
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <Activity className="size-4 shrink-0" />
+            <span className="truncate">Alert Rules</span>
             {filteredRules.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="secondary" className="ml-2 shrink-0">
                 {filteredRules.length}
               </Badge>
             )}
@@ -331,10 +361,10 @@ export function AlertsPage() {
           {rulesLoading ? (
             <RuleSkeleton />
           ) : filteredRules.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex flex-col items-center justify-center py-12 text-center px-4">
               <FileText className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold">No alert rules found</h3>
-              <p className="text-muted-foreground mt-1 max-w-md">
+              <p className="text-muted-foreground mt-1 max-w-md text-sm">
                 {hasActiveFilters
                   ? "No rules match your current filters. Try adjusting or clearing them."
                   : "No alert rules configured yet. Create your first rule to get started."}
@@ -355,16 +385,22 @@ export function AlertsPage() {
               )}
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead className="w-[100px]">Severity</TableHead>
-                    <TableHead className="w-[100px]">Threshold</TableHead>
-                    <TableHead className="w-[120px]">Window</TableHead>
-                    <TableHead className="w-[100px]">Status</TableHead>
-                    <TableHead className="w-[140px] text-right">Actions</TableHead>
+                    <TableHead className="min-w-[140px]">Name</TableHead>
+                    <TableHead className="min-w-[90px]">Severity</TableHead>
+                    <TableHead className="min-w-[80px]">Threshold</TableHead>
+                    <TableHead className="min-w-[100px] hidden sm:table-cell">
+                      Window
+                    </TableHead>
+                    <TableHead className="min-w-[90px] hidden md:table-cell">
+                      Status
+                    </TableHead>
+                    <TableHead className="min-w-[120px] text-right">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -376,22 +412,34 @@ export function AlertsPage() {
                     >
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
-                          {rule.name}
-                          <ChevronRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100" />
+                          <span className="truncate">{rule.name}</span>
+                          <ChevronRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 shrink-0" />
                         </div>
                         {rule.match_pattern && (
-                          <p className="text-xs text-muted-foreground mt-0.5">
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">
                             Pattern: {rule.match_pattern}
                           </p>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={getSeverityColor(rule.severity)}>{rule.severity}</Badge>
+                        <Badge
+                          variant={getSeverityColor(rule.severity)}
+                          className="text-xs"
+                        >
+                          {rule.severity}
+                        </Badge>
                       </TableCell>
-                      <TableCell>{rule.threshold}</TableCell>
-                      <TableCell>{rule.time_window_seconds}s</TableCell>
-                      <TableCell>
-                        <Badge variant={rule.is_active ? "default" : "outline"}>
+                      <TableCell className="text-sm">
+                        {rule.threshold}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-sm">
+                        {rule.time_window_seconds}s
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <Badge
+                          variant={rule.is_active ? "default" : "outline"}
+                          className="text-xs"
+                        >
                           {rule.is_active ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
@@ -400,6 +448,7 @@ export function AlertsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="size-8"
                             onClick={(e) => {
                               e.stopPropagation();
                               openEditDialog(rule);
@@ -411,6 +460,7 @@ export function AlertsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="size-8"
                             onClick={(e) => {
                               e.stopPropagation();
                               toggleMutation.mutate({
@@ -418,22 +468,27 @@ export function AlertsPage() {
                                 is_active: !rule.is_active,
                               });
                             }}
-                            title={rule.is_active ? "Disable" : "Enable"}
+                            title={
+                              rule.is_active ? "Disable" : "Enable"
+                            }
                           >
                             <Power
                               className={`size-4 ${
-                                rule.is_active ? "text-green-500" : "text-muted-foreground"
+                                rule.is_active
+                                  ? "text-green-500"
+                                  : "text-muted-foreground"
                               }`}
                             />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="size-8"
                             onClick={(e) => {
                               e.stopPropagation();
                               if (
                                 confirm(
-                                  "Are you sure you want to delete this alert rule?"
+                                  "Are you sure you want to delete this alert rule?",
                                 )
                               ) {
                                 deleteMutation.mutate(rule.id);
@@ -457,19 +512,19 @@ export function AlertsPage() {
       {/* Alert History */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <History className="size-5" />
-            Recent Alert History
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <History className="size-5 shrink-0" />
+            <span className="truncate">Recent Alert History</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {historyLoading ? (
             <HistorySkeleton />
           ) : !history || history.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex flex-col items-center justify-center py-12 text-center px-4">
               <Clock className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold">No alert history</h3>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 text-sm">
                 Alerts will appear here when your rules are triggered.
               </p>
             </div>
@@ -480,27 +535,33 @@ export function AlertsPage() {
                 return (
                   <div
                     key={h.id}
-                    className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/30 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border p-3 hover:bg-muted/30 transition-colors"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium">
+                      <p className="text-sm font-medium truncate">
                         {rule?.name || `Rule ${h.rule_id.slice(0, 8)}...`}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(h.triggered_at).toLocaleString()}
                         {h.resolved_at && (
                           <span className="ml-2 text-green-600">
-                            Resolved: {new Date(h.resolved_at).toLocaleString()}
+                            Resolved:{" "}
+                            {new Date(h.resolved_at).toLocaleString()}
                           </span>
                         )}
                       </p>
                       {h.details && Object.keys(h.details).length > 0 && (
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mt-1 break-all">
                           {JSON.stringify(h.details).slice(0, 100)}
                         </p>
                       )}
                     </div>
-                    <Badge variant={getSeverityColor(h.severity)}>{h.severity}</Badge>
+                    <Badge
+                      variant={getSeverityColor(h.severity)}
+                      className="self-start sm:self-center shrink-0"
+                    >
+                      {h.severity}
+                    </Badge>
                   </div>
                 );
               })}
@@ -511,7 +572,7 @@ export function AlertsPage() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg max-w-[calc(100%-2rem)] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingRule ? "Edit Alert Rule" : "Create Alert Rule"}
@@ -535,7 +596,7 @@ export function AlertsPage() {
                 required
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Severity</Label>
                 <Select
@@ -633,7 +694,9 @@ export function AlertsPage() {
               </Button>
               <Button
                 type="submit"
-                disabled={createMutation.isPending || updateMutation.isPending}
+                disabled={
+                  createMutation.isPending || updateMutation.isPending
+                }
               >
                 {createMutation.isPending || updateMutation.isPending
                   ? "Saving..."
@@ -647,21 +710,26 @@ export function AlertsPage() {
       </Dialog>
 
       {/* Rule Detail Dialog */}
-      <Dialog open={!!detailRule} onOpenChange={() => setDetailRule(null)}>
-        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+      <Dialog
+        open={!!detailRule}
+        onOpenChange={() => setDetailRule(null)}
+      >
+        <DialogContent className="sm:max-w-lg max-w-[calc(100%-2rem)] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              Rule Details
+              <Bell className="h-5 w-5 shrink-0" />
+              <span className="truncate">Rule Details</span>
             </DialogTitle>
           </DialogHeader>
           {detailRule && (
             <div className="space-y-6">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <Badge variant={getSeverityColor(detailRule.severity)}>
                   {detailRule.severity}
                 </Badge>
-                <Badge variant={detailRule.is_active ? "default" : "outline"}>
+                <Badge
+                  variant={detailRule.is_active ? "default" : "outline"}
+                >
                   {detailRule.is_active ? "Active" : "Inactive"}
                 </Badge>
               </div>
@@ -670,21 +738,27 @@ export function AlertsPage() {
                 <label className="text-xs font-medium text-muted-foreground">
                   Name
                 </label>
-                <div className="text-sm font-medium">{detailRule.name}</div>
+                <div className="text-sm font-medium break-words">
+                  {detailRule.name}
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-muted-foreground">
                     Threshold
                   </label>
-                  <div className="text-sm">{detailRule.threshold} occurrences</div>
+                  <div className="text-sm">
+                    {detailRule.threshold} occurrences
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-muted-foreground">
                     Time Window
                   </label>
-                  <div className="text-sm">{detailRule.time_window_seconds}s</div>
+                  <div className="text-sm">
+                    {detailRule.time_window_seconds}s
+                  </div>
                 </div>
               </div>
 
@@ -693,7 +767,7 @@ export function AlertsPage() {
                   <label className="text-xs font-medium text-muted-foreground">
                     Match Pattern
                   </label>
-                  <div className="font-mono text-sm bg-muted rounded px-2 py-1">
+                  <div className="font-mono text-sm bg-muted rounded px-2 py-1 break-all">
                     {detailRule.match_pattern}
                   </div>
                 </div>
@@ -720,19 +794,23 @@ export function AlertsPage() {
                     {ruleHistory.map((h) => (
                       <div
                         key={h.id}
-                        className="flex items-center justify-between rounded-lg border p-3"
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border p-3"
                       >
-                        <div>
+                        <div className="min-w-0">
                           <p className="text-xs text-muted-foreground">
                             {new Date(h.triggered_at).toLocaleString()}
                           </p>
                           {h.resolved_at && (
                             <p className="text-xs text-green-600">
-                              Resolved: {new Date(h.resolved_at).toLocaleString()}
+                              Resolved:{" "}
+                              {new Date(h.resolved_at).toLocaleString()}
                             </p>
                           )}
                         </div>
-                        <Badge variant={getSeverityColor(h.severity)}>
+                        <Badge
+                          variant={getSeverityColor(h.severity)}
+                          className="self-start sm:self-center shrink-0"
+                        >
                           {h.severity}
                         </Badge>
                       </div>
@@ -741,7 +819,7 @@ export function AlertsPage() {
                 )}
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   variant="outline"
                   size="sm"

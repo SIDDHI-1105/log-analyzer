@@ -65,8 +65,8 @@ export function RegisterPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1">
           <div className="flex items-center gap-2">
-            <UserPlus className="size-5 text-primary" />
-            <CardTitle className="text-2xl">Create account</CardTitle>
+            <UserPlus className="size-5 text-primary shrink-0" />
+            <CardTitle className="text-xl sm:text-2xl">Create account</CardTitle>
           </div>
           <CardDescription>Enter your details to create a new account</CardDescription>
         </CardHeader>
@@ -110,7 +110,7 @@ export function RegisterPage() {
             <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
               {registerMutation.isPending ? "Creating account..." : "Create account"}
             </Button>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground text-center">
               Already have an account?{" "}
               <Link to="/login" className="font-medium text-primary underline-offset-4 hover:underline">
                 Sign in

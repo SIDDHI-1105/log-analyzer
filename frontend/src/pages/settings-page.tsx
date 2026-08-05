@@ -63,14 +63,12 @@ export function SettingsPage() {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  // Password form
   const [passwordForm, setPasswordForm] = useState({
     current_password: "",
     new_password: "",
     confirm_password: "",
   });
 
-  // API key form
   const [keyName, setKeyName] = useState("");
 
   const { data: currentUser, isLoading: userLoading } = useQuery({
@@ -208,8 +206,8 @@ export function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="mt-2 text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Settings</h1>
+        <p className="mt-2 text-muted-foreground text-sm sm:text-base">
           Manage your account, API keys, and preferences
         </p>
       </div>
@@ -217,8 +215,8 @@ export function SettingsPage() {
       {/* Profile Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="size-5" />
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <User className="size-5 shrink-0" />
             Profile
           </CardTitle>
           <CardDescription>Your account information</CardDescription>
@@ -234,22 +232,22 @@ export function SettingsPage() {
             <>
               {/* Avatar Section */}
               <div className="flex items-center gap-4">
-                <div className="relative">
-                  <Avatar className="size-20">
+                <div className="relative shrink-0">
+                  <Avatar className="size-16 sm:size-20">
                     {displayUser.avatar_url ? (
                       <AvatarImage src={displayUser.avatar_url} alt={displayUser.email} />
                     ) : null}
-                    <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-medium">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-xl sm:text-2xl font-medium">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                   <button
                     onClick={handleAvatarClick}
                     disabled={uploading}
-                    className="absolute -right-1 -bottom-1 flex size-8 items-center justify-center rounded-full bg-secondary border border-border shadow-sm hover:bg-accent transition-colors disabled:opacity-50"
+                    className="absolute -right-1 -bottom-1 flex size-7 sm:size-8 items-center justify-center rounded-full bg-secondary border border-border shadow-sm hover:bg-accent transition-colors disabled:opacity-50"
                     title="Change profile picture"
                   >
-                    <Camera className="size-4" />
+                    <Camera className="size-3.5 sm:size-4" />
                   </button>
                   <input
                     ref={fileInputRef}
@@ -259,8 +257,8 @@ export function SettingsPage() {
                     className="hidden"
                   />
                 </div>
-                <div>
-                  <p className="text-sm font-medium">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">
                     {displayUser.email.split("@")[0]}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -274,19 +272,19 @@ export function SettingsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Email</Label>
-                  <p className="text-sm font-medium">{displayUser.email}</p>
+                  <Label className="text-muted-foreground text-xs sm:text-sm">Email</Label>
+                  <p className="text-sm font-medium break-all">{displayUser.email}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Role</Label>
+                  <Label className="text-muted-foreground text-xs sm:text-sm">Role</Label>
                   <div className="mt-1">
                     <Badge variant="secondary">{displayUser.role}</Badge>
                   </div>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Status</Label>
+                  <Label className="text-muted-foreground text-xs sm:text-sm">Status</Label>
                   <div className="mt-1">
                     <Badge variant={displayUser.is_active ? "default" : "destructive"}>
                       {displayUser.is_active ? "Active" : "Inactive"}
@@ -294,8 +292,8 @@ export function SettingsPage() {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">User ID</Label>
-                  <p className="text-sm font-mono">{displayUser.id}</p>
+                  <Label className="text-muted-foreground text-xs sm:text-sm">User ID</Label>
+                  <p className="text-sm font-mono break-all">{displayUser.id}</p>
                 </div>
               </div>
 
@@ -317,15 +315,15 @@ export function SettingsPage() {
 
       {/* API Keys Card */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <CardTitle className="flex items-center gap-2">
-              <Key className="size-5" />
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <Key className="size-5 shrink-0" />
               API Keys
             </CardTitle>
             <CardDescription>Manage your API keys for programmatic access</CardDescription>
           </div>
-          <Button size="sm" onClick={() => setCreateKeyOpen(true)}>
+          <Button size="sm" onClick={() => setCreateKeyOpen(true)} className="self-start">
             <Key className="mr-2 size-4" />
             Create Key
           </Button>
@@ -337,7 +335,7 @@ export function SettingsPage() {
               <Skeleton className="h-12 w-full" />
             </div>
           ) : !apiKeys || apiKeys.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="flex flex-col items-center justify-center py-8 text-center px-4">
               <FileText className="h-10 w-10 text-muted-foreground mb-3" />
               <h3 className="text-sm font-medium">No API keys</h3>
               <p className="text-xs text-muted-foreground mt-1 max-w-sm">
@@ -349,11 +347,11 @@ export function SettingsPage() {
               {apiKeys.map((key) => (
                 <div
                   key={key.id}
-                  className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/30 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border p-3 hover:bg-muted/30 transition-colors"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">{key.name}</p>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
                       <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono">
                         {key.key_prefix}...
                       </code>
@@ -362,7 +360,7 @@ export function SettingsPage() {
                       </Badge>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 ml-2">
+                  <div className="flex items-center gap-1 self-start sm:self-center shrink-0">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -398,14 +396,14 @@ export function SettingsPage() {
       {/* Theme Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Monitor className="size-5" />
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <Monitor className="size-5 shrink-0" />
             Appearance
           </CardTitle>
           <CardDescription>Choose your preferred theme</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               variant={theme === "light" ? "default" : "outline"}
               size="sm"
@@ -436,7 +434,7 @@ export function SettingsPage() {
 
       {/* Change Password Dialog */}
       <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-w-[calc(100%-2rem)] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
             <DialogDescription>Enter your current and new password</DialogDescription>
@@ -492,7 +490,7 @@ export function SettingsPage() {
 
       {/* Create API Key Dialog */}
       <Dialog open={createKeyOpen} onOpenChange={setCreateKeyOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-w-[calc(100%-2rem)]">
           <DialogHeader>
             <DialogTitle>Create API Key</DialogTitle>
             <DialogDescription>

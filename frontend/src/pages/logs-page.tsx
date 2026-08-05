@@ -68,47 +68,25 @@ function getLevelColor(
 function LogSkeleton() {
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-4">
-        <Skeleton className="h-4 w-[140px]" />
-        <Skeleton className="h-4 w-[80px]" />
-        <Skeleton className="h-4 w-[100px]" />
-        <Skeleton className="h-4 flex-1" />
-      </div>
-      <div className="flex items-center gap-4">
-        <Skeleton className="h-4 w-[140px]" />
-        <Skeleton className="h-4 w-[80px]" />
-        <Skeleton className="h-4 w-[100px]" />
-        <Skeleton className="h-4 flex-1" />
-      </div>
-      <div className="flex items-center gap-4">
-        <Skeleton className="h-4 w-[140px]" />
-        <Skeleton className="h-4 w-[80px]" />
-        <Skeleton className="h-4 w-[100px]" />
-        <Skeleton className="h-4 flex-1" />
-      </div>
-      <div className="flex items-center gap-4">
-        <Skeleton className="h-4 w-[140px]" />
-        <Skeleton className="h-4 w-[80px]" />
-        <Skeleton className="h-4 w-[100px]" />
-        <Skeleton className="h-4 flex-1" />
-      </div>
-      <div className="flex items-center gap-4">
-        <Skeleton className="h-4 w-[140px]" />
-        <Skeleton className="h-4 w-[80px]" />
-        <Skeleton className="h-4 w-[100px]" />
-        <Skeleton className="h-4 flex-1" />
-      </div>
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="flex items-center gap-4">
+          <Skeleton className="h-4 w-[100px] sm:w-[140px]" />
+          <Skeleton className="h-4 w-[60px] sm:w-[80px]" />
+          <Skeleton className="h-4 w-[80px] sm:w-[100px]" />
+          <Skeleton className="h-4 flex-1" />
+        </div>
+      ))}
     </div>
   );
 }
 
 function FilterSkeleton() {
   return (
-    <div className="flex items-center gap-4">
-      <Skeleton className="h-9 w-[200px]" />
-      <Skeleton className="h-9 w-[140px]" />
-      <Skeleton className="h-9 w-[140px]" />
-      <Skeleton className="h-9 w-[120px]" />
+    <div className="flex flex-wrap items-center gap-3">
+      <Skeleton className="h-9 w-full sm:w-[200px]" />
+      <Skeleton className="h-9 w-full sm:w-[140px]" />
+      <Skeleton className="h-9 w-full sm:w-[140px]" />
+      <Skeleton className="h-9 w-full sm:w-[120px]" />
     </div>
   );
 }
@@ -134,7 +112,6 @@ export default function LogsPage() {
       }),
   });
 
-  // Derive distinct services from logs data
   const services = data?.items
     ? [...new Set(data.items.map((log) => log.service).filter(Boolean))].sort()
     : [];
@@ -162,15 +139,15 @@ export default function LogsPage() {
     levelFilter !== "ALL" || serviceFilter !== "ALL" || searchQuery !== "";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <ScrollText className="h-8 w-8 text-primary" />
-            Log Explorer
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
+            <ScrollText className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" />
+            <span className="truncate">Log Explorer</span>
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm">
             Browse, search, and analyze application logs
           </p>
         </div>
@@ -179,9 +156,10 @@ export default function LogsPage() {
           size="sm"
           onClick={handleRefresh}
           disabled={isLoading}
+          className="shrink-0 self-start"
         >
           <RefreshCw
-            className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+            className={`h-4 w-4 mr-2 shrink-0 ${isLoading ? "animate-spin" : ""}`}
           />
           Refresh
         </Button>
@@ -191,7 +169,7 @@ export default function LogsPage() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <Filter className="h-4 w-4" />
+            <Filter className="h-4 w-4 shrink-0" />
             Filters
           </CardTitle>
         </CardHeader>
@@ -199,9 +177,9 @@ export default function LogsPage() {
           {isLoading && !data ? (
             <FilterSkeleton />
           ) : (
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
               {/* Search */}
-              <div className="relative">
+              <div className="relative w-full sm:w-auto sm:min-w-[200px] sm:max-w-[280px]">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search logs..."
@@ -210,7 +188,7 @@ export default function LogsPage() {
                     setSearchQuery(e.target.value);
                     setSkip(0);
                   }}
-                  className="pl-9 w-[280px]"
+                  className="pl-9 w-full"
                 />
               </div>
 
@@ -222,7 +200,7 @@ export default function LogsPage() {
                   setSkip(0);
                 }}
               >
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full sm:w-[140px]">
                   <SelectValue placeholder="Level" />
                 </SelectTrigger>
                 <SelectContent>
@@ -243,7 +221,7 @@ export default function LogsPage() {
                   setSkip(0);
                 }}
               >
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Service" />
                 </SelectTrigger>
                 <SelectContent>
@@ -264,7 +242,7 @@ export default function LogsPage() {
                   setSkip(0);
                 }}
               >
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-full sm:w-[120px]">
                   <SelectValue placeholder="Per page" />
                 </SelectTrigger>
                 <SelectContent>
@@ -281,9 +259,9 @@ export default function LogsPage() {
                   variant="ghost"
                   size="sm"
                   onClick={handleClearFilters}
-                  className="text-muted-foreground"
+                  className="text-muted-foreground self-start sm:self-auto"
                 >
-                  <X className="h-4 w-4 mr-1" />
+                  <X className="h-4 w-4 mr-1 shrink-0" />
                   Clear
                 </Button>
               )}
@@ -296,26 +274,26 @@ export default function LogsPage() {
       <Card>
         <CardContent className="p-0">
           {isLoading && !data ? (
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <LogSkeleton />
             </div>
           ) : isError ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-              <h3 className="text-lg font-semibold">Failed to load logs</h3>
-              <p className="text-muted-foreground mt-1 mb-4">
+            <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center px-4">
+              <AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 text-destructive mb-4" />
+              <h3 className="text-base sm:text-lg font-semibold">Failed to load logs</h3>
+              <p className="text-muted-foreground mt-1 mb-4 text-sm max-w-md">
                 There was an error fetching the logs. Please try again.
               </p>
               <Button onClick={handleRefresh} variant="outline">
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-4 w-4 mr-2 shrink-0" />
                 Retry
               </Button>
             </div>
           ) : data?.items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold">No logs found</h3>
-              <p className="text-muted-foreground mt-1 max-w-md">
+            <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center px-4">
+              <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-4" />
+              <h3 className="text-base sm:text-lg font-semibold">No logs found</h3>
+              <p className="text-muted-foreground mt-1 max-w-md text-sm">
                 {hasActiveFilters
                   ? "No logs match your current filters. Try adjusting or clearing your filters."
                   : "No logs are available yet. Logs will appear here once they are ingested."}
@@ -327,68 +305,70 @@ export default function LogsPage() {
                   onClick={handleClearFilters}
                   className="mt-4"
                 >
-                  <X className="h-4 w-4 mr-2" />
+                  <X className="h-4 w-4 mr-2 shrink-0" />
                   Clear Filters
                 </Button>
               )}
             </div>
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[160px]">
-                      <Clock className="h-3.5 w-3.5 inline mr-1" />
-                      Timestamp
-                    </TableHead>
-                    <TableHead className="w-[90px]">
-                      <Activity className="h-3.5 w-3.5 inline mr-1" />
-                      Level
-                    </TableHead>
-                    <TableHead className="w-[140px]">
-                      <Server className="h-3.5 w-3.5 inline mr-1" />
-                      Service
-                    </TableHead>
-                    <TableHead>
-                      <Layers className="h-3.5 w-3.5 inline mr-1" />
-                      Message
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data?.items.map((log) => (
-                    <TableRow
-                      key={log.id}
-                      className="cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => setSelectedLog(log)}
-                    >
-                      <TableCell className="font-mono text-xs whitespace-nowrap">
-                        {log.timestamp
-                          ? new Date(log.timestamp).toLocaleString()
-                          : new Date(log.created_at).toLocaleString()}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={getLevelColor(log.level)}
-                          className="text-xs"
-                        >
-                          {log.level}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {log.service || "—"}
-                      </TableCell>
-                      <TableCell className="max-w-[500px] truncate text-sm">
-                        {log.message}
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[120px] sm:w-[160px]">
+                        <Clock className="h-3.5 w-3.5 inline mr-1 shrink-0" />
+                        Timestamp
+                      </TableHead>
+                      <TableHead className="w-[80px] sm:w-[90px]">
+                        <Activity className="h-3.5 w-3.5 inline mr-1 shrink-0" />
+                        Level
+                      </TableHead>
+                      <TableHead className="w-[100px] sm:w-[140px]">
+                        <Server className="h-3.5 w-3.5 inline mr-1 shrink-0" />
+                        Service
+                      </TableHead>
+                      <TableHead className="min-w-[200px]">
+                        <Layers className="h-3.5 w-3.5 inline mr-1 shrink-0" />
+                        Message
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {data?.items.map((log) => (
+                      <TableRow
+                        key={log.id}
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => setSelectedLog(log)}
+                      >
+                        <TableCell className="font-mono text-xs whitespace-nowrap">
+                          {log.timestamp
+                            ? new Date(log.timestamp).toLocaleString()
+                            : new Date(log.created_at).toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={getLevelColor(log.level)}
+                            className="text-xs"
+                          >
+                            {log.level}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {log.service || "—"}
+                        </TableCell>
+                        <TableCell className="max-w-[200px] sm:max-w-[300px] md:max-w-[400px] lg:max-w-[500px] truncate text-sm">
+                          {log.message}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
               {/* Pagination */}
-              <div className="flex items-center justify-between px-6 py-4 border-t">
-                <div className="text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t">
+                <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
                   Showing{" "}
                   <span className="font-medium">
                     {data?.total ? skip + 1 : 0}
@@ -406,10 +386,12 @@ export default function LogsPage() {
                     size="sm"
                     onClick={() => setSkip((s) => Math.max(0, s - limit))}
                     disabled={skip <= 0}
+                    className="size-8 sm:h-8 sm:w-auto px-0 sm:px-2.5"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Prev</span>
                   </Button>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-xs sm:text-sm text-muted-foreground">
                     Page {currentPage} of {totalPages}
                   </span>
                   <Button
@@ -417,8 +399,10 @@ export default function LogsPage() {
                     size="sm"
                     onClick={() => setSkip((s) => s + limit)}
                     disabled={!data || skip + limit >= data.total}
+                    className="size-8 sm:h-8 sm:w-auto px-0 sm:px-2.5"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="h-4 w-4 sm:ml-1" />
                   </Button>
                 </div>
               </div>
@@ -429,18 +413,18 @@ export default function LogsPage() {
 
       {/* Log Detail Dialog */}
       <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-lg md:max-w-2xl max-h-[85vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <FileText className="h-5 w-5 shrink-0" />
               Log Detail
             </DialogTitle>
           </DialogHeader>
 
           {selectedLog && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Level & Service */}
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <Badge
                   variant={getLevelColor(selectedLog.level)}
                   className="text-sm"
@@ -448,14 +432,14 @@ export default function LogsPage() {
                   {selectedLog.level}
                 </Badge>
                 <span className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Server className="h-3.5 w-3.5" />
+                  <Server className="h-3.5 w-3.5 shrink-0" />
                   {selectedLog.service || "—"}
                 </span>
               </div>
 
               {/* Timestamp */}
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                <Clock className="h-4 w-4 shrink-0" />
                 {selectedLog.timestamp
                   ? new Date(selectedLog.timestamp).toLocaleString(undefined, {
                       weekday: "short",
@@ -481,7 +465,7 @@ export default function LogsPage() {
 
               {/* Message */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <label className="text-sm font-medium text-muted-foreground">
                     Message
                   </label>
@@ -489,35 +473,35 @@ export default function LogsPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleCopyMessage(selectedLog.message)}
-                    className="h-8"
+                    className="h-8 shrink-0"
                   >
                     {copied ? (
                       <>
-                        <Check className="h-4 w-4 mr-1 text-green-500" />
-                        Copied
+                        <Check className="h-4 w-4 mr-1 text-green-500 shrink-0" />
+                        <span className="hidden sm:inline">Copied</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="h-4 w-4 mr-1" />
-                        Copy
+                        <Copy className="h-4 w-4 mr-1 shrink-0" />
+                        <span className="hidden sm:inline">Copy</span>
                       </>
                     )}
                   </Button>
                 </div>
-                <div className="bg-muted rounded-lg p-4 font-mono text-sm whitespace-pre-wrap break-all">
+                <div className="bg-muted rounded-lg p-3 sm:p-4 font-mono text-xs sm:text-sm whitespace-pre-wrap break-all">
                   {selectedLog.message}
                 </div>
               </div>
 
               {/* Metadata Grid */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {selectedLog.trace_id && (
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                      <Hash className="h-3 w-3" />
+                      <Hash className="h-3 w-3 shrink-0" />
                       Trace ID
                     </label>
-                    <div className="font-mono text-sm bg-muted rounded px-2 py-1 break-all">
+                    <div className="font-mono text-xs sm:text-sm bg-muted rounded px-2 py-1 break-all">
                       {selectedLog.trace_id}
                     </div>
                   </div>
@@ -526,10 +510,10 @@ export default function LogsPage() {
                 {selectedLog.host && (
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                      <Server className="h-3 w-3" />
+                      <Server className="h-3 w-3 shrink-0" />
                       Host
                     </label>
-                    <div className="font-mono text-sm bg-muted rounded px-2 py-1">
+                    <div className="font-mono text-xs sm:text-sm bg-muted rounded px-2 py-1 break-all">
                       {selectedLog.host}
                     </div>
                   </div>
@@ -540,7 +524,7 @@ export default function LogsPage() {
                     <label className="text-xs font-medium text-muted-foreground">
                       Span ID
                     </label>
-                    <div className="font-mono text-sm bg-muted rounded px-2 py-1 break-all">
+                    <div className="font-mono text-xs sm:text-sm bg-muted rounded px-2 py-1 break-all">
                       {selectedLog.span_id}
                     </div>
                   </div>
@@ -550,7 +534,7 @@ export default function LogsPage() {
                   <label className="text-xs font-medium text-muted-foreground">
                     Log ID
                   </label>
-                  <div className="font-mono text-sm bg-muted rounded px-2 py-1 break-all">
+                  <div className="font-mono text-xs sm:text-sm bg-muted rounded px-2 py-1 break-all">
                     {selectedLog.id}
                   </div>
                 </div>
@@ -563,7 +547,7 @@ export default function LogsPage() {
                     <label className="text-sm font-medium text-muted-foreground">
                       Extra Data
                     </label>
-                    <pre className="bg-muted rounded-lg p-4 text-xs font-mono overflow-x-auto">
+                    <pre className="bg-muted rounded-lg p-3 sm:p-4 text-xs font-mono overflow-x-auto">
                       {JSON.stringify(selectedLog.extra_data, null, 2)}
                     </pre>
                   </div>

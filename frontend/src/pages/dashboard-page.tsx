@@ -65,13 +65,13 @@ function StatsCard({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="size-4 text-muted-foreground" />
+        <Icon className="size-4 text-muted-foreground shrink-0" />
       </CardHeader>
       <CardContent>
         {loading ? (
           <Skeleton className="h-8 w-20" />
         ) : (
-          <div className="text-2xl font-bold">{value}</div>
+          <div className="text-xl sm:text-2xl font-bold">{value}</div>
         )}
         <p className="text-xs text-muted-foreground">{subtitle}</p>
       </CardContent>
@@ -129,23 +129,24 @@ export function DashboardPage() {
   const isLoading = statsLoading || seriesLoading;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="mt-2 text-muted-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="mt-1 sm:mt-2 text-sm text-muted-foreground">
             Overview of your observability platform
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Clock className="size-4 text-muted-foreground" />
+        <div className="flex items-center gap-2 shrink-0">
+          <Clock className="size-4 text-muted-foreground shrink-0" />
           {TIME_RANGES.map((range) => (
             <Button
               key={range.hours}
               variant={timeRange === range.hours ? "default" : "outline"}
               size="sm"
               onClick={() => setTimeRange(range.hours)}
+              className="text-xs sm:text-sm"
             >
               {range.label}
             </Button>
@@ -154,7 +155,7 @@ export function DashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Logs"
           value={stats?.total_logs ?? 0}
@@ -186,12 +187,12 @@ export function DashboardPage() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
         {/* Bar Chart - Logs by Level */}
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Activity className="size-4" />
+              <Activity className="size-4 shrink-0" />
               Logs by Level
             </CardTitle>
           </CardHeader>
@@ -206,13 +207,14 @@ export function DashboardPage() {
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "6px",
+                      fontSize: "12px",
                     }}
                   />
                   <Bar dataKey="count" radius={[4, 4, 0, 0]}>
@@ -230,7 +232,7 @@ export function DashboardPage() {
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <TrendingUp className="size-4" />
+              <TrendingUp className="size-4 shrink-0" />
               Volume Over Time
             </CardTitle>
           </CardHeader>
@@ -245,13 +247,14 @@ export function DashboardPage() {
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={timeSeriesData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="time" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={60} />
-                  <YAxis tick={{ fontSize: 12 }} />
+                  <XAxis dataKey="time" tick={{ fontSize: 9 }} angle={-45} textAnchor="end" height={50} />
+                  <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "6px",
+                      fontSize: "12px",
                     }}
                   />
                   <Line
@@ -271,7 +274,7 @@ export function DashboardPage() {
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Server className="size-4" />
+              <Server className="size-4 shrink-0" />
               Logs by Service
             </CardTitle>
           </CardHeader>
@@ -289,8 +292,8 @@ export function DashboardPage() {
                     data={serviceData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={40}
-                    outerRadius={70}
+                    innerRadius={30}
+                    outerRadius={60}
                     paddingAngle={5}
                     dataKey="value"
                   >
@@ -303,9 +306,10 @@ export function DashboardPage() {
                       backgroundColor: "hsl(var(--card))",
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "6px",
+                      fontSize: "12px",
                     }}
                   />
-                  <Legend iconSize={8} wrapperStyle={{ fontSize: "12px" }} />
+                  <Legend iconSize={8} wrapperStyle={{ fontSize: "11px" }} />
                 </PieChart>
               </ResponsiveContainer>
             )}
@@ -314,11 +318,11 @@ export function DashboardPage() {
       </div>
 
       {/* Bottom Row - Recent Logs & Active Alerts */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="size-4" />
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <Activity className="size-4 shrink-0" />
               Recent Logs
             </CardTitle>
           </CardHeader>
@@ -334,7 +338,7 @@ export function DashboardPage() {
                 {logItems.slice(0, 5).map((log) => (
                   <div
                     key={log.id}
-                    className="flex items-center justify-between rounded-lg border p-3"
+                    className="flex items-center justify-between rounded-lg border p-2.5 sm:p-3 gap-2"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">
@@ -350,6 +354,7 @@ export function DashboardPage() {
                           ? "destructive"
                           : "secondary"
                       }
+                      className="shrink-0"
                     >
                       {log.level}
                     </Badge>
@@ -364,8 +369,8 @@ export function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="size-4" />
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <Bell className="size-4 shrink-0" />
               Active Alert Rules
             </CardTitle>
           </CardHeader>
@@ -381,7 +386,7 @@ export function DashboardPage() {
                 {activeAlerts.slice(0, 5).map((rule) => (
                   <div
                     key={rule.id}
-                    className="flex items-center justify-between rounded-lg border p-3"
+                    className="flex items-center justify-between rounded-lg border p-2.5 sm:p-3 gap-2"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">
@@ -392,7 +397,7 @@ export function DashboardPage() {
                         {rule.time_window_seconds}s
                       </p>
                     </div>
-                    <Badge variant="default">{rule.severity}</Badge>
+                    <Badge variant="default" className="shrink-0">{rule.severity}</Badge>
                   </div>
                 ))}
               </div>

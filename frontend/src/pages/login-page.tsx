@@ -48,8 +48,8 @@ export function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1">
           <div className="flex items-center gap-2">
-            <LogIn className="size-5 text-primary" />
-            <CardTitle className="text-2xl">Sign in</CardTitle>
+            <LogIn className="size-5 text-primary shrink-0" />
+            <CardTitle className="text-xl sm:text-2xl">Sign in</CardTitle>
           </div>
           <CardDescription>Enter your credentials to access your account</CardDescription>
         </CardHeader>
@@ -82,7 +82,7 @@ export function LoginPage() {
             <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
               {loginMutation.isPending ? "Signing in..." : "Sign in"}
             </Button>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground text-center">
               Do not have an account?{" "}
               <Link to="/register" className="font-medium text-primary underline-offset-4 hover:underline">
                 Sign up
