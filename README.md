@@ -168,45 +168,57 @@ Modern applications generate massive amounts of log data. Existing solutions are
 
 ### Getting Started
 
-1. **Visit the Live Demo** — Click the link above
-2. **Create an Account** — Click "Sign up" and register with your email
-3. **Log In** — Use your credentials to access the dashboard
+cat >> /workspaces/log-analyzer/README.md << 'README_EOF'
 
-### Dashboard
+---
 
-After logging in, you'll see the **Dashboard** with:
-- Summary statistics (total logs, errors, warnings)
-- Interactive charts showing log trends
-- Recent log entries
-- Active alerts
+## How to Use Log Analyzer
 
-Use the **time range buttons** (24h, 7d, 30d) to filter data.
+### Step 1: Create Your Account
+Open the app in your browser. Click **Sign up**, enter your email and password, and you're in.
 
-### Log Explorer
+### Step 2: Get Your API Key
+Go to **Settings → API Keys → Create Key**. Give it a name like "My Website" and click **Create**. Copy the key — it looks like `la_live_abc123xyz789...`. You will only see it once.
 
-Navigate to **Log Explorer** from the sidebar to:
-- Browse all ingested logs
-- Search by keyword in the search bar
-- Filter by log level (ERROR, WARNING, INFO, etc.)
-- Filter by service name
-- Click on any log row to see full details
+### Step 3: Send Logs From Your Application
+This is the important part. You write a small piece of code in **your own app** (your website, mobile app, or server) that sends logs to Log Analyzer using your API key.
 
-### Alerts
+Here is a complete example. Imagine **John** runs an online shop. He wants to track what happens on his website.
 
-Go to **Alerts** to:
-- View existing alert rules
-- Create new rules (e.g., "Trigger if more than 10 ERROR logs in 5 minutes")
-- Toggle rules on/off
-- View alert trigger history
+**John's Python website code:**
+```python
+import requests
+import datetime
 
-### Settings
+# John copies these two values from his Log Analyzer Settings
+API_KEY = "la_live_abc123xyz789..."  
+LOG_URL = "https://log-analyzer-backend-3pk8.onrender.com/api/v1/ingest"
 
-In **Settings**, you can:
-- Update your profile and avatar
-- Change your password
-- Generate API keys for programmatic access
-- Switch between light/dark themes
+def send_log(message, level="INFO", service="johns-shop"):
+    data = {
+        "message": message,           # What happened: "User logged in"
+        "level": level,               # DEBUG, INFO, WARNING, ERROR, CRITICAL
+        "service": service,           # Which part of your app: "payment", "auth", etc.
+        "timestamp": datetime.datetime.utcnow().isoformat()
+    }
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+    requests.post(LOG_URL, json=data, headers=headers)
 
+# Now John uses this everywhere in his website:
+
+# When someone visits his homepage:
+send_log("User visited homepage", "INFO", "johns-shop")
+
+# When someone buys something:
+send_log("Payment started", "INFO", "payment")
+send_log("Payment completed successfully", "INFO", "payment")
+
+# When something goes wrong:
+send_log("Payment failed: card declined", "ERROR", "payment")
+send_log("Database connection timeout", "ERROR", "database")
 ---
 
 ## 📸 Screenshots
