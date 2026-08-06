@@ -1,5 +1,5 @@
 
-readme_content = """<div align="center">
+readme_content = '''<div align="center">
 
 # 🔍 Log Analyzer
 
@@ -155,22 +155,14 @@ Modern applications generate massive amounts of log data. Existing solutions are
 
 🔗 **API Documentation:** [https://log-analyzer-kq8h.onrender.com/docs](https://log-analyzer-kq8h.onrender.com/docs)
 
-> **Note:** The application uses Render's free tier, so the backend may take 30-60 seconds to wake up if it has been idle. Please be patient on first load!
+> **Note:** The application uses Render\'s free tier, so the backend may take 30-60 seconds to wake up if it has been idle. Please be patient on first load!
 
 ---
 
 ## 🚀 How to Use
 
-### Getting Started
-
-cat >> /workspaces/log-analyzer/README.md << 'README_EOF'
-
----
-
-## How to Use Log Analyzer
-
 ### Step 1: Create Your Account
-Open the app in your browser. Click **Sign up**, enter your email and password, and you're in.
+Open the app in your browser. Click **Sign up**, enter your email and password, and you\'re in.
 
 ### Step 2: Get Your API Key
 Go to **Settings → API Keys → Create Key**. Give it a name like "My Website" and click **Create**. Copy the key — it looks like `la_live_abc123xyz789...`. You will only see it once.
@@ -180,7 +172,7 @@ This is the important part. You write a small piece of code in **your own app** 
 
 Here is a complete example. Imagine **John** runs an online shop. He wants to track what happens on his website.
 
-**John's Python website code:**
+**John\'s Python website code:**
 ```python
 import requests
 import datetime
@@ -193,7 +185,7 @@ def send_log(message, level="INFO", service="johns-shop"):
     data = {
         "message": message,           # What happened: "User logged in"
         "level": level,               # DEBUG, INFO, WARNING, ERROR, CRITICAL
-        "service": service,           # Which part of your app: "payment", "auth", etc.
+        "service": service,             # Which part of your app: "payment", "auth", etc.
         "timestamp": datetime.datetime.utcnow().isoformat()
     }
     headers = {
@@ -214,7 +206,17 @@ send_log("Payment completed successfully", "INFO", "payment")
 # When something goes wrong:
 send_log("Payment failed: card declined", "ERROR", "payment")
 send_log("Database connection timeout", "ERROR", "database")
----
+```
+
+### Step 4: See Your Data
+As soon as John\'s website sends logs, he refreshes his Log Analyzer dashboard and sees:
+- **Dashboard:** Total logs, error rate, charts, and graphs
+- **Logs page:** Every single log with filters and search
+- **Alerts page:** He can create rules like "Tell me if 5 errors happen in 1 minute"
+
+### That\'s It
+Your app sends logs. Log Analyzer collects them. You view and analyze them. No downloads, no installations — just your API key and a few lines of code.
+
 ---
 
 ## 📸 Screenshots
@@ -442,7 +444,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
+3. Commit your changes (`git commit -m \'Add amazing feature\'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
@@ -461,8 +463,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ⭐ Star this repository if you find it helpful!
 
 </div>
-"""
+'''
 
+with open('/mnt/agents/output/README.md', 'w') as f:
+    f.write(readme_content)
 
-
-
+print("README.md created successfully!")
+print(f"File size: {len(readme_content)} characters")
