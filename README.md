@@ -465,8 +465,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 </div>
 '''
 
-with open('/mnt/agents/output/README.md', 'w') as f:
-    f.write(readme_content)
 
-print("README.md created successfully!")
-print(f"File size: {len(readme_content)} characters")
